@@ -186,19 +186,19 @@ def main(calc):
                     # place object and move
                     turn("left")
                     # skip placeholders and substitute zeros
-                    if d != 'a':
-                        adv_put(d,"star")
-                    elif d == 0:
+                    if d == 'b':
                         adv_put(1,"token")
+                    elif d != 'a':
+                        adv_put(d,"star")
                 else:
                     # no wall border, place object and move
                     print("DEBUG: move")
                     adv_move()
                     # skip placeholders and substitute zeros
-                    if d != 'a':
-                        adv_put(d,"star")
-                    elif d == 0:
+                    if d == 'b':
                         adv_put(1,"token")
+                    elif d != 'a':
+                        adv_put(d,"star")
 
         if i != 2:
             print("DEBUG: reset to next lane")
@@ -230,6 +230,7 @@ print("##- Reeborg's Calculator - #")
 print("## - - - - - - - - - - - - #")
 
 print("# DEFAULT TEMPLATE NOT USED! #")
+print("# ZERO IS SMILEY FACE/TOKEN")
 
 """
 Create interface to define how much operations you want to calculate and plot
