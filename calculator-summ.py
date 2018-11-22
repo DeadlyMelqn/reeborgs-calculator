@@ -15,7 +15,12 @@ a < b - a is smaller than
 
 elif - else if - make it check another condition if last one failed
 list = allows you to store multiple values
+
+THIS CODE IS MENT TO BE USED ON AN EMPTY TEMPLATE! CODE BELOW WILL DO SO,
+IF NOT THEN SWITCH TO WORLD "ALONE", SET ROBOT POS TO 1,10.
+THEN GIVE ENOUGH STARS, CARROTS, TOKENS, STRAWBERRIES TO ROBOT
 """
+import reeborg_en
 
 ## WORLD/ROBOT SETTINGS ##
 # create environment automatically, drastically reduces processing time
@@ -34,7 +39,9 @@ loop = 1
 class calculation:
     #operators=['add', 'sub', 'mul', 'mod']
 
+    # init used to put initial equation
     def __init__(self, operator, num1, num2):
+        # self. is used to allow var to be used in all functions in the class
         self.operator = operator
         self.num1 = num1
         self.num2 = num2
@@ -44,14 +51,18 @@ class calculation:
     #        if op in self.operator:
     #            self.operator = operators[i]
 
+   # calculate
     def main_p1(self):
+        # create new vars to return
         self.total = 0
         self.remainder = 0
+        # identify what operator has been inputted
         if "add" in self.operator:
             self.total = self.num1 + self.num2
         elif "sub" in self.operator:
             self.total = self.num1 - self.num2
             if (self.total < 0):
+                # raise an error as reeborg cannot place negative objects
                 raise ReeborgError(" ! You're only allowed to subtract a smaller number")
         elif "mul" in self.operator:
             self.total = self.num1 * self.num2
@@ -64,12 +75,13 @@ class calculation:
             raise ReeborgError(" ! Unknown operation")
 
     def returnValue(self):
+        # return values to give to main function, so it can plot the values
         return [self.num1, self.num2, self.total, self.remainder]
 
 # Functions that better enable and improve reeborg's ability to move and etc
 #manipulate turn_left() to make a definiton to turn right, left, or look behind
 def turn(x):
-    if x == "left" or not x:
+    if x == "left" or x == 0:
         turn_left()
     elif x == "right" or x == 1:
         for i in range(0,3):
@@ -89,18 +101,10 @@ def adv_move(x=1):
             break
 #allows you to put a specific amount and appropiately substitute zeros
 def adv_put(x=1,y="star"):
-    if x == '0':
-        if y == "star":
-            put("token")
-        elif y == "carrot":
-            put("strawberry")
-        else:
-            raise ReeborgError(" ! What to substitute zero with?")
-    else:
         for i in range(0,x):
-            put(y)
+                put(y)
 #move down appropiatly and reset to plot rest of equation
-# TODO: remove
+# TODO: remove, unnecessary and can type in loop. more specific-scenario for calculator
 def move_lane(x):
     for i in range(0,2):
         adv_move()
@@ -124,55 +128,95 @@ def split_digits(x):
     else:
         return split_digits(x // 10) + [x % 10]
 
-def main(x):
-    calc = x
+# Create a nested loop that sorts out digit length, splits digits into appropiate location, and plots
+def main(calc):
+    # create dict that makes a list for each lane to properly place each digit
     plot = {}
 
+    # identify digit length to space appropiately
     digit_amount = digits(max(calc))
-    print("DEBUG: digit_amount is %d" % (digit_amount))
+    print("DEBUG: digit_amount is", digit_amount)
 
+    robot = position_here()
+    enough_space = 10 - robot[0]
+    if ((digit_amount + 1) >= enough_space):
+        turn("right")
+        adv_move(4)
+        turn("right")
+        adv_move(robot[0])
+        turn("behind")
+
+    """
+    Enumerate is used to grab an iterative of a list or dict with list (in my case) and
+    they are assigned to local variables of my choosing.
+
+    Enumerate can be used in lots of cases but explained for my case of use.
+    """
     for i, value in enumerate(calc[:-1]):
-        print("DEBUG: i is %d and value is %d" % (i, value))
+        # split digits into each lane. using the dict i had initiatited
         plot[i] = split_digits(value)
-        print("DEBUG: before placeholders", plot)
+        print("DEBUG: before placeholders", plot[i])
 
+        # prevents looping into last lane and starting new lane. allows me to place remainder
         if i != 3:
+            # compares current digits to largest digits and makes placeholders to ensure proper digit location
             if (digit_amount > digits(value)):
                 placeholders = digit_amount - digits(value)
-                print("DEBUG: placeholders is %d" % (placeholders))
+                print("DEBUG: placeholders is", placeholders)
                 for c in range(0,placeholders):
                     plot[i].insert(0,'a')
-                print("DEBUG: after placeholders", plot)
+                print("DEBUG: after placeholders", plot[i])
 
+            # places digits now. loop for per lane.
             for k, d in enumerate(plot[i]):
-                print("DEBUG: k is %d and d is %d" % (i, value))
+                # once on the 2nd lane it will build the seperator while placing necessary objects
                 if i == 1:
+                    # wall border
+                    print("DEBUG: move and walls")
                     adv_move()
                     turn("right")
                     build_wall()
+                    # place object and move
                     turn("left")
-                    adv_put(d,"star")
+                    if d != 'a':
+                        adv_put(d,"star")
+                    elif d == 0:
+                        adv_put(1,"token")
                 else:
+                    # no wall border, place object and move
+                    print("DEBUG: move")
                     adv_move()
-                    adv_put(d,"star")
+                    if d != 'a':
+                        adv_put(d,"star")
+                    elif d == 0:
+                        adv_put(1,"token")
 
         if i != 2:
+            print("DEBUG: reset to next lane")
             move_lane("right")
+            # takes in max amount of digits and allows you to reset to proper location ...
+            # to place next digits
             adv_move(digit_amount + 1)
             turn("behind")
         else:
-            if i == 3 and (value > 0):
-                for k, d in enumerate(plot[i]):
-                    adv_move()
-                    adv_put(d,"carrot")
+            # remainder portion
+            # UNTESTED!!
+            if (calc[3] > 0):
+                print("DEBUG: remainder, place carrot")
+                adv_move()
+                adv_put(calc[3],"carrot")
+            # once we finish our digits move to next position to start new equation
+            print("DEBUG: reset to start next")
             adv_move()
             turn("left")
             adv_move(2)
             turn("right")
 
-    print("DEBUG: Finished nested loop")
+    return print("Plotted")
 
 ## CODE ##
+
+# intro
 print("##- Reeborg's Calculator - #")
 print("## - - - - - - - - - - - - #")
 
@@ -182,22 +226,24 @@ TODO: - create count variable and instead create a calculation object for each e
       - instead of looping and resetting class object, make multiple class objects and
       just loop plotting instead
 """
+# loop will break once user does not want anymore equation
 while loop == 1:
-    c = calculation(
-        input("Enter operation: "),
-        int(input("Enter a number: ")),
-        int(input("Enter a second number: "))
-        )
+    # user input
+    c = calculation(input("Enter operation: "), int(input("Enter a number: ")), int(input("Enter a second number: ")))
+    # calculate as object
     c.main_p1()
+    # provide total and if remainder to user
     print("Total: ", c.total)
     if (c.remainder > 0):
         print("Remainder: ", c.remainder)
 
+    # begin plotting with provided object
     print("Plotting ...")
     main(c.returnValue())
 
     del c
 
+    # ask the user if you want to place more digits
     choice = input("#- Another Equation? Yes/No")
     if 'y' in choice:
         continue
@@ -207,4 +253,5 @@ while loop == 1:
     else:
         raise ReeborgError(" ! Invalid response")
 
+# finish code
 raise ReeborgOK("##- Finished")
