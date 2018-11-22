@@ -3,23 +3,29 @@ Title: Calculator Reeborg's world
 Date: Nov. 7, 2018
 Author: Yuvraj Chohan
 
+https://www.github.com/DeadlyMelqn/reeborgs-calculator
+
 2 Portions - Calculating, Plotting
 
 star - integers
  ^ token - zero
 carrot - remainder
- ^ strawberry - zero
 
 a > b - a is greater than
 a < b - a is smaller than
 
 elif - else if - make it check another condition if last one failed
 list = allows you to store multiple values
+dict = value for each key you can make
 
-THIS CODE IS MENT TO BE USED ON AN EMPTY TEMPLATE! CODE BELOW WILL DO SO,
+THIS CODE IS MENT TO BE USED ON AN EMPTY TEMPLATE! CODE SHOULD EXECUTE NEW WORLD.
 IF NOT THEN SWITCH TO WORLD "ALONE", SET ROBOT POS TO 1,10.
 THEN GIVE ENOUGH STARS, CARROTS, TOKENS, STRAWBERRIES TO ROBOT
 """
+
+__author__ = "Yuvraj Chohan"
+__email__ = "dailytroll92@gmail.com"
+
 import reeborg_en
 
 ## WORLD/ROBOT SETTINGS ##
@@ -29,7 +35,7 @@ World("Alone")
 remove_robots()
 reeborg = UsedRobot(1, 10)
 for item in ["star", "carrot", "token", "strawberry"]:
-    RUR.give_object_to_robot(item,100)
+    RUR.give_object_to_robot(item,150)
 
 ## GLOBAL VARIABLES ##
 loop = 1
@@ -137,6 +143,7 @@ def main(calc):
     digit_amount = digits(max(calc))
     print("DEBUG: digit_amount is", digit_amount)
 
+    # checks if there is enough space to type in another equation, otherwise moves down
     robot = position_here()
     enough_space = 10 - robot[0]
     if ((digit_amount + 1) >= enough_space):
@@ -178,6 +185,7 @@ def main(calc):
                     build_wall()
                     # place object and move
                     turn("left")
+                    # skip placeholders and substitute zeros
                     if d != 'a':
                         adv_put(d,"star")
                     elif d == 0:
@@ -186,6 +194,7 @@ def main(calc):
                     # no wall border, place object and move
                     print("DEBUG: move")
                     adv_move()
+                    # skip placeholders and substitute zeros
                     if d != 'a':
                         adv_put(d,"star")
                     elif d == 0:
@@ -220,9 +229,11 @@ def main(calc):
 print("##- Reeborg's Calculator - #")
 print("## - - - - - - - - - - - - #")
 
+print("# DEFAULT TEMPLATE NOT USED! #")
+
 """
 Create interface to define how much operations you want to calculate and plot
-TODO: - create count variable and instead create a calculation object for each equation
+TODO: - create count var,create a calculation object for each equation instead of del c
       - instead of looping and resetting class object, make multiple class objects and
       just loop plotting instead
 """
@@ -243,11 +254,12 @@ while loop == 1:
 
     del c
 
-    # ask the user if you want to place more digits
+    # ask the user if you want to more equation
     choice = input("#- Another Equation? Yes/No")
     if 'y' in choice:
         continue
     elif 'n' in choice:
+        # break the loop
         loop = 0
         break
     else:
